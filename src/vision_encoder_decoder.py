@@ -213,8 +213,10 @@ class SmallCap(PreTrainedModel):
         self.encoder.config = self.config.encoder
         self.decoder.config = self.config.decoder
         self.to_latent = nn.Identity()
-        self.mlp_norm = nn.LayerNorm(2048)
-        self.mlp_head = nn.Linear(2048, 10000)
+        # self.mlp_norm = nn.LayerNorm(2048)
+        self.mlp_norm = nn.LayerNorm(768)
+        # self.mlp_head = nn.Linear(2048, 50257)
+        self.mlp_head = nn.Linear(768, 50257)
         
     def get_encoder(self):
         return self.encoder
@@ -309,7 +311,6 @@ class SmallCap(PreTrainedModel):
         >>> # load fine-tuned model
         >>> model = VisionEncoderDecoderModel.from_pretrained("./vit-bert")
         ```"""
-
         kwargs_encoder = {
             argument[len("encoder_") :]: value for argument, value in kwargs.items() if argument.startswith("encoder_")
         }
@@ -485,11 +486,10 @@ class SmallCap(PreTrainedModel):
             encoder_outputs = BaseModelOutput(encoder_outputs, None)
 
         encoder_hidden_states = encoder_outputs[0]
-
+        
         encoder_hidden_states = self.to_latent(encoder_hidden_states)
-
+        
         encoder_hidden_states = self.mlp_norm(encoder_hidden_states)
-        encoder_hidden_states = self.mlp_head(encoder_hidden_states)
 
         # else:
         encoder_attention_mask = None
