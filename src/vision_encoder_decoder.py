@@ -212,7 +212,10 @@ class SmallCap(PreTrainedModel):
         # so that the updates to the config will be synced
         self.encoder.config = self.config.encoder
         self.decoder.config = self.config.decoder
-
+        self.to_latent = nn.Identity()
+        self.mlp_norm = nn.LayerNorm(2048)
+        self.mlp_head = nn.Linear(2048, 10000)
+        
     def get_encoder(self):
         return self.encoder
 
@@ -405,9 +408,6 @@ class SmallCap(PreTrainedModel):
 
         # instantiate config with corresponding kwargs
         config = SmallCapConfig.from_encoder_decoder_configs(encoder.config, decoder.config, **kwargs)
-        self.to_latent = nn.Identity()
-        self.mlp_norm = nn.LayerNorm(2048)
-        self.mlp_head = nn.Linear(2048, 10000)
         # make sure input & output embeddings is not tied
         config.tie_word_embeddings = False
         return cls(encoder=encoder, decoder=decoder, config=config)
